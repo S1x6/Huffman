@@ -3,17 +3,11 @@
 void compress(FILE * fin, FILE * fout)
 {
 	Tree * q = makeTree(fin);
-	encodeTree(q, fout);
+	if (!encodeTree(q, fout)) //не проверено на целых
+		writeLeftBits(fout);
+
 	
 }
-
-
-
-
-
-
-
-
 
 Tree * makeTree(FILE * fin)
 {
@@ -60,7 +54,7 @@ int * analyzeText(FILE * fin)
 	return table;
 }
 
-void bitWriter(FILE * fout, unsigned char bit) 
+int bitWriter(FILE * fout, unsigned char bit) 
 {
 	static char currentBit = 0;
 	static unsigned char byte = 0;
@@ -71,30 +65,39 @@ void bitWriter(FILE * fout, unsigned char bit)
 		currentBit = 0;
 		fwrite(&byte, sizeof(char), 1, fout);
 		byte = 0;
+		return 1;
 	}
+	return 0;
 }
 
-void encodeTree(Tree * tree, FILE * fout)
+int encodeTree(Tree * tree, FILE * fout)
 {
+	char ret;
 	if (tree->left) {
 		bitWriter(fout, 1);
 		encodeTree(tree->left, fout);
-		bitWriter(fout, 1);
+		ret = bitWriter(fout, 1);
 		encodeTree(tree->right, fout);
+		return ret;
 	}
 	else
 	{
-		bitWriter(fout, 0);
+		ret = bitWriter(fout, 0);
 		writeByte(fout, tree->key);
+		return ret;
 	}
-
-	
 }
 
 void writeByte(FILE * fout, unsigned char byte)
 {
 	char i = 0;
 	for (; i < 8; i++) {
-		bitWriter(fout, byte & (1 << (7 - i)) );
+		bitWriter(fout, (byte & (1 << (7 - i))) != 0 );
 	}
+}
+
+void writeLeftBits(FILE * fout)
+{
+	do {
+	} while (!bitWriter(fout, 0));
 }
