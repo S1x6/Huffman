@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "compressor.h"
-
+#include "decompressor.h"
 
 int main()
 {
@@ -16,6 +16,7 @@ int main()
 	if (type)
 		switch (type) {
 		case 'd': 
+			decompress(fin);
 			break;
 		case 'c':
 			compress(fin, fout);

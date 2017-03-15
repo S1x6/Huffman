@@ -1,12 +1,48 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "compressor.h"
 
 void compress(FILE * fin, FILE * fout)
 {
-	Tree * q = makeTree(fin);
-	if (!encodeTree(q, fout)) //не проверено на целых
-		writeLeftBits(fout);
-
+	Tree * tree = makeTree(fin);
+	int isRead, i = 0;
+	char * code = calloc(1,1), ch = 0;
+	encodeTree(tree, fout);
+	char ** table = malloc(256 * sizeof(char*));
+	fillTable(table);
+	makeCodeTable(tree, code, table);
+	fseek(fin, 2, SEEK_SET);
+	do {
+		isRead = fread(&ch, 1, 1, fin);
+		if (isRead)
+		{
+			for (; i < strlen(table[ch]); i++) {
+				bitWriter(fout, table[ch][i]);
+			}
+		}
+	} while (isRead);
 	
+}
+
+void makeCodeTable(Tree * tree, char * code, char ** table)
+{
+	if (tree->left)	{
+		makeCodeTable(tree->left, strcat(code, "0"), table);
+		code[strlen(code) - 1] = 0;
+		makeCodeTable(tree->right, strcat(code, "1"),table);
+		code[strlen(code) - 1] = 0;
+	}
+	else
+	{
+		table[tree->key] = code;
+	}
+}
+
+void fillTable(char ** t)
+{
+	int i = 0;
+	for (; i < 256; i++) {
+		t[i] = calloc(256, sizeof(char));
+	}
 }
 
 Tree * makeTree(FILE * fin)
@@ -74,9 +110,9 @@ int encodeTree(Tree * tree, FILE * fout)
 {
 	char ret;
 	if (tree->left) {
-		bitWriter(fout, 1);
-		encodeTree(tree->left, fout);
 		ret = bitWriter(fout, 1);
+		encodeTree(tree->left, fout);
+		//ret = bitWriter(fout, 1);
 		encodeTree(tree->right, fout);
 		return ret;
 	}
