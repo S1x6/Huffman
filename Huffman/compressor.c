@@ -117,7 +117,7 @@ int * analyzeText(FILE * fin)
 	{
 		read =(char)fread(&tmp, sizeof(char), 1, fin);
 		if (!read)
-			exit(0);
+			break;
 		table[tmp] += 1;
 	} while (1);
 	return table;

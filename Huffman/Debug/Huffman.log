@@ -1,0 +1,14 @@
+﻿  queue.c
+c:\users\admin\desktop\queue.h(12): error C2061: синтаксическая ошибка: идентификатор "_List"
+c:\users\admin\desktop\queue.h(14): error C2059: синтаксическая ошибка: }
+c:\users\admin\desktop\queue.c(11): error C2059: синтаксическая ошибка: }
+  compressor.c
+c:\users\admin\desktop\queue.h(12): error C2061: синтаксическая ошибка: идентификатор "_List"
+c:\users\admin\desktop\queue.h(14): error C2059: синтаксическая ошибка: }
+c:\users\admin\desktop\compressor.c(11): warning C4013: malloc: нет определения; предполагается "extern" с возвратом типа "int"
+c:\users\admin\desktop\compressor.c(14): warning C4267: =: преобразование из "size_t" в "char"; возможна потеря данных
+c:\users\admin\desktop\compressor.c(11): warning C4047: инициализация: "int *" отличается по уровням косвенного обращения от "int"
+  Source.c
+c:\users\admin\desktop\queue.h(12): error C2061: синтаксическая ошибка: идентификатор "_List"
+c:\users\admin\desktop\queue.h(14): error C2059: синтаксическая ошибка: }
+  Создание кода...

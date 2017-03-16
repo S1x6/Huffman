@@ -1,0 +1,4 @@
+﻿  compressor.c
+d:\программирование\huffman\huffman\compressor.c(120): warning C4013: exit: нет определения; предполагается "extern" с возвратом типа "int"
+  Huffman.vcxproj -> D:\Программирование\Huffman\x64\Debug\Huffman.exe
+  Huffman.vcxproj -> D:\Программирование\Huffman\x64\Debug\Huffman.pdb (Partial PDB)
