@@ -1,10 +1,34 @@
 #include "decompressor.h"
 
-void decompress(FILE * fin)
+void decompress(FILE * fin, FILE * fout)
 {
 	Tree * tree = NULL;
+	char placeholderNumber;
+	fread(&placeholderNumber, 1, 1, fin);
 	tree = readTree(fin, tree);
+	while (!feof(fin))
+	{
+		decode(tree, fin, fout);
+	}
+}
 
+void decode(Tree * tree,FILE * fin, FILE * fout)
+{
+	char bit;
+	Tree * tmp = tree;
+	if (tmp->left == NULL)
+		fwrite(&(tmp->key), 1, 1, fout);
+
+	while (readBit(&bit, fin)) {
+		if (bit) {
+			tmp = tmp->right;
+		}
+		else tmp = tmp->left;
+		if (tmp->left == NULL) {
+			fwrite(&(tmp->key), 1, 1, fout);
+			break;
+		}
+	}
 }
 
 Tree * readTree(FILE * fin, Tree * tree)

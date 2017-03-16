@@ -3,24 +3,29 @@
 
 void compress(FILE * fin, FILE * fout)
 {
+	char ** table = malloc(256 * sizeof(char*));
 	Tree * tree = makeTree(fin);
 	int isRead, i = 0;
-	char * code = calloc(1,1), ch = 0;
+	char * code = calloc(1, 1), ch = 0, isByte, leftBits = 0;
+	writeByte(fout, 0); //резевируем первый байт в файле для числа дописанных бит
 	encodeTree(tree, fout);
-	char ** table = malloc(256 * sizeof(char*));
 	fillTable(table);
 	makeCodeTable(tree, code, table);
-	fseek(fin, 2, SEEK_SET);
+	fseek(fin, 3, SEEK_SET);
 	do {
 		isRead = fread(&ch, 1, 1, fin);
 		if (isRead)
 		{
+			i = 0;
 			for (; i < strlen(table[ch]); i++) {
-				bitWriter(fout, table[ch][i]);
+				isByte = bitWriter(fout, table[ch][i] - '0');
 			}
 		}
 	} while (isRead);
-	
+	if (!isByte)
+		leftBits = writeLeftBits(fout);
+	fseek(fout, 0, SEEK_SET);
+	fwrite(&leftBits, 1, 1, fout); //количество дописанных бит
 }
 
 void makeCodeTable(Tree * tree, char * code, char ** table)
@@ -33,7 +38,7 @@ void makeCodeTable(Tree * tree, char * code, char ** table)
 	}
 	else
 	{
-		table[tree->key] = code;
+		strcpy(table[tree->key], code);
 	}
 }
 
@@ -132,8 +137,12 @@ void writeByte(FILE * fout, unsigned char byte)
 	}
 }
 
-void writeLeftBits(FILE * fout)
+char writeLeftBits(FILE * fout)
 {
-	do {
-	} while (!bitWriter(fout, 0));
+	char res = 0;
+	while (!bitWriter(fout, 0))
+	{
+		res++;
+	}
+	return res + 1;
 }

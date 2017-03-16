@@ -16,7 +16,7 @@ int main()
 	if (type)
 		switch (type) {
 		case 'd': 
-			decompress(fin);
+			decompress(fin, fout);
 			break;
 		case 'c':
 			compress(fin, fout);
