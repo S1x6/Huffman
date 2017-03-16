@@ -3,8 +3,14 @@
 void decompress(FILE * fin, FILE * fout)
 {
 	Tree * tree = NULL;
+	int i = 0;
+	char bit;
 	char placeholderNumber;
-	fread(&placeholderNumber, 1, 1, fin);
+	if (!fread(&placeholderNumber, 1, 1, fin))
+		return;
+	for (; i < placeholderNumber; i++) {
+		readBit(&bit, fin);
+	}
 	tree = readTree(fin, tree);
 	while (!feof(fin))
 	{

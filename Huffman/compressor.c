@@ -4,16 +4,21 @@
 void compress(FILE * fin, FILE * fout)
 {
 	char ** table = malloc(256 * sizeof(char*));
-	Tree * tree = makeTree(fin);
 	int isRead, i = 0;
-	char * code = calloc(1, 1), ch = 0, isByte, leftBits = 0;
-	writeByte(fout, 0); //резевируем первый байт в файле для числа дописанных бит
-	encodeTree(tree, fout);
+	char * code = calloc(1, 1), isByte, leftBits = 0;
+	unsigned char ch = 0;
+	int * frequency_table = analyzeText(fin);
+	Tree * tree = makeTree(fin, frequency_table);
 	fillTable(table);
 	makeCodeTable(tree, code, table);
+	leftBits = 8 - (countTreeBits(tree) + countBits(frequency_table, table) ) % 8;
+	writeByte(fout, leftBits);
+	for (; i < leftBits; i++)
+		bitWriter(fout, 0);
+	encodeTree(tree, fout);
 	fseek(fin, 3, SEEK_SET);
 	do {
-		isRead = fread(&ch, 1, 1, fin);
+		isRead = (int) fread(&ch, 1, 1, fin);
 		if (isRead)
 		{
 			i = 0;
@@ -22,10 +27,22 @@ void compress(FILE * fin, FILE * fout)
 			}
 		}
 	} while (isRead);
-	if (!isByte)
-		leftBits = writeLeftBits(fout);
-	fseek(fout, 0, SEEK_SET);
-	fwrite(&leftBits, 1, 1, fout); //количество дописанных бит
+}
+
+int countTreeBits(Tree * tree)
+{
+	int num = 0;
+	if (tree->left) {
+		num += 1;
+		num += countTreeBits(tree->left);
+		num += countTreeBits(tree->right);
+		return num % 8;
+	}
+	else
+	{
+		num += 1;
+		return num % 8;
+	}
 }
 
 void makeCodeTable(Tree * tree, char * code, char ** table)
@@ -42,6 +59,18 @@ void makeCodeTable(Tree * tree, char * code, char ** table)
 	}
 }
 
+char countBits(int * f, char ** c)
+{
+	int i = 0;
+	char res = 0;
+	for (; i < 256; i++) {
+		if (!f[i])
+			continue;
+		res = (res + (f[i] * strlen(c[i])) % 8 ) % 8;
+	}
+	return res;
+}
+
 void fillTable(char ** t)
 {
 	int i = 0;
@@ -50,10 +79,9 @@ void fillTable(char ** t)
 	}
 }
 
-Tree * makeTree(FILE * fin)
+Tree * makeTree(FILE * fin, int * table)
 {
 	int i = 0;
-	int * table = analyzeText(fin);
 	Queue * q = malloc(sizeof(q));
 	q->head = NULL;
 	q->tail = NULL;
@@ -89,7 +117,7 @@ int * analyzeText(FILE * fin)
 	{
 		read =(char)fread(&tmp, sizeof(char), 1, fin);
 		if (!read)
-			break;
+			exit(0);
 		table[tmp] += 1;
 	} while (1);
 	return table;
@@ -117,7 +145,6 @@ int encodeTree(Tree * tree, FILE * fout)
 	if (tree->left) {
 		ret = bitWriter(fout, 1);
 		encodeTree(tree->left, fout);
-		//ret = bitWriter(fout, 1);
 		encodeTree(tree->right, fout);
 		return ret;
 	}

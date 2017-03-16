@@ -4,7 +4,7 @@
 #include <malloc.h>
 
 typedef struct _Tree {
-	char key;
+	unsigned char key;
 	struct _Tree * left;
 	struct _Tree * right;
 	int weight;
