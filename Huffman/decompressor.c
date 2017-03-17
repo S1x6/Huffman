@@ -4,26 +4,38 @@ void decompress(FILE * fin, FILE * fout)
 {
 	Tree * tree = NULL;
 	int i = 0;
-	char bit;
-	char placeholderNumber;
+	unsigned char bit;
+	unsigned char read;
+	unsigned char placeholderNumber;
 	if (!fread(&placeholderNumber, 1, 1, fin))
 		return;
 	for (; i < placeholderNumber; i++) {
 		readBit(&bit, fin);
 	}
 	tree = readTree(fin, tree);
+
+	if (!tree)
+		return;
+
 	while (!feof(fin))
 	{
-		decode(tree, fin, fout);
+		read = 1;
+		if (!tree->left)
+			read = readBit(&bit, fin);
+		if (read)
+			decode(tree, fin, fout
+			);
 	}
 }
 
 void decode(Tree * tree,FILE * fin, FILE * fout)
 {
-	char bit;
+	unsigned char bit;
 	Tree * tmp = tree;
-	if (tmp->left == NULL)
+	if (tmp->left == NULL) {
 		fwrite(&(tmp->key), 1, 1, fout);
+		return;
+	}
 
 	while (readBit(&bit, fin)) {
 		if (bit) {
@@ -39,8 +51,8 @@ void decode(Tree * tree,FILE * fin, FILE * fout)
 
 Tree * readTree(FILE * fin, Tree * tree)
 {
-	char bit;
-	char byte;
+	unsigned char bit;
+	unsigned char byte;
 	if (readBit(&bit, fin)) {
 		tree = malloc(sizeof(Tree));
 		if (bit) {
@@ -60,10 +72,10 @@ Tree * readTree(FILE * fin, Tree * tree)
 		return NULL;
 }
 
-char readBit(char * bit, FILE * fin)
+unsigned char readBit(unsigned char * bit, FILE * fin)
 {
-	static char byte;
-	static char currentBit = 0;
+	static unsigned char byte;
+	static unsigned char currentBit = 0;
 
 	if (currentBit == 0)
 		fread(&byte, sizeof(char), 1, fin);
@@ -75,9 +87,9 @@ char readBit(char * bit, FILE * fin)
 	return !feof(fin);
 }
 
-char readByte(FILE * fin)
+unsigned char readByte(FILE * fin)
 {
-	char res = 0, bit;
+	unsigned char res = 0, bit;
 	int i = 0;
 	for (; i < 8; i++) {
 		readBit(&bit, fin);

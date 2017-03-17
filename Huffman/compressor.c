@@ -3,12 +3,14 @@
 
 void compress(FILE * fin, FILE * fout)
 {
-	char ** table = malloc(256 * sizeof(char*));
+	unsigned char ** table = malloc(256 * sizeof(char*));
 	int isRead, i = 0;
-	char * code = calloc(1, 1), isByte, leftBits = 0;
+	unsigned char * code = calloc(1, 1), isByte, leftBits = 0;
 	unsigned char ch = 0;
 	int * frequency_table = analyzeText(fin);
-	Tree * tree = makeTree(fin, frequency_table);
+	if (!frequency_table)
+		return;
+	Tree * tree = makeTree(frequency_table);
 	fillTable(table);
 	makeCodeTable(tree, code, table);
 	leftBits = 8 - (countTreeBits(tree) + countBits(frequency_table, table) ) % 8;
@@ -55,14 +57,16 @@ void makeCodeTable(Tree * tree, char * code, char ** table)
 	}
 	else
 	{
-		strcpy(table[tree->key], code);
+		if (strlen(code))
+			strcpy(table[tree->key], code);
+		else strcpy(table[tree->key], "0");
 	}
 }
 
-char countBits(int * f, char ** c)
+unsigned char countBits(int * f, char ** c)
 {
 	int i = 0;
-	char res = 0;
+	unsigned char res = 0;
 	for (; i < 256; i++) {
 		if (!f[i])
 			continue;
@@ -71,7 +75,7 @@ char countBits(int * f, char ** c)
 	return res;
 }
 
-void fillTable(char ** t)
+void fillTable(unsigned char ** t)
 {
 	int i = 0;
 	for (; i < 256; i++) {
@@ -79,7 +83,7 @@ void fillTable(char ** t)
 	}
 }
 
-Tree * makeTree(FILE * fin, int * table)
+Tree * makeTree(int * table)
 {
 	int i = 0;
 	Queue * q = malloc(sizeof(q));
@@ -113,19 +117,24 @@ int * analyzeText(FILE * fin)
 {
 	unsigned char tmp, read;
 	int * table = (int *)calloc(256, sizeof(int));
-	do
+	read = (char)fread(&tmp, sizeof(char), 1, fin);
+	if (!read)
+		return NULL;
+	//fseek(fin, -1, SEEK_SET);
+	while (1)
 	{
+		table[tmp] += 1;
 		read =(char)fread(&tmp, sizeof(char), 1, fin);
 		if (!read)
 			break;
-		table[tmp] += 1;
-	} while (1);
+		
+	} 
 	return table;
 }
 
 int bitWriter(FILE * fout, unsigned char bit) 
 {
-	static char currentBit = 0;
+	static unsigned char currentBit = 0;
 	static unsigned char byte = 0;
 
 	byte |= bit << (7 - currentBit);
@@ -141,7 +150,7 @@ int bitWriter(FILE * fout, unsigned char bit)
 
 int encodeTree(Tree * tree, FILE * fout)
 {
-	char ret;
+	unsigned char ret;
 	if (tree->left) {
 		ret = bitWriter(fout, 1);
 		encodeTree(tree->left, fout);
@@ -158,15 +167,15 @@ int encodeTree(Tree * tree, FILE * fout)
 
 void writeByte(FILE * fout, unsigned char byte)
 {
-	char i = 0;
+	unsigned char i = 0;
 	for (; i < 8; i++) {
 		bitWriter(fout, (byte & (1 << (7 - i))) != 0 );
 	}
 }
 
-char writeLeftBits(FILE * fout)
+unsigned char writeLeftBits(FILE * fout)
 {
-	char res = 0;
+	unsigned char res = 0;
 	while (!bitWriter(fout, 0))
 	{
 		res++;

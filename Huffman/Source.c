@@ -3,10 +3,11 @@
 #include "compressor.h"
 #include "decompressor.h"
 
+
 int main()
 {
-	FILE * fin = fopen("in.txt","r");
-	FILE * fout = fopen("out.txt", "w");
+	FILE * fin = fopen("in.txt","rb");
+	FILE * fout = fopen("out.txt", "wb");
 	if (!fin || !fout)
 		printf("No such file in directory or couldn't create output file");
 
