@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "compressor.h"
+#define BITS 7
 
 void compress(FILE * fin, FILE * fout)
 {
@@ -137,7 +138,7 @@ int bitWriter(FILE * fout, unsigned char bit)
 	static unsigned char currentBit = 0;
 	static unsigned char byte = 0;
 
-	byte |= bit << (7 - currentBit);
+	byte |= bit << (BITS - currentBit);
 	currentBit++;
 	if (currentBit == 8) {
 		currentBit = 0;
@@ -169,7 +170,7 @@ void writeByte(FILE * fout, unsigned char byte)
 {
 	unsigned char i = 0;
 	for (; i < 8; i++) {
-		bitWriter(fout, (byte & (1 << (7 - i))) != 0 );
+		bitWriter(fout, (byte & (1 << (BITS - i))) !=0 );
 	}
 }
 
