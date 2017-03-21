@@ -8,20 +8,21 @@ void compress(FILE * fin, FILE * fout)
 	int isRead, i = 0;
 	unsigned char * code = calloc(1, 1), isByte, leftBits = 0;
 	unsigned char ch = 0;
+	Tree * tree = NULL;
 	int * frequency_table = analyzeText(fin);
 	if (!frequency_table)
 		return;
-	Tree * tree = makeTree(frequency_table);
+	tree = makeTree(frequency_table);
 	fillTable(table);
 	makeCodeTable(tree, code, table);
-	leftBits = 8 - (countTreeBits(tree) + countBits(frequency_table, table) ) % 8;
+	leftBits = 8 - (countTreeBits(tree) + countBits(frequency_table, table)) % 8;
 	writeByte(fout, leftBits);
 	for (; i < leftBits; i++)
 		bitWriter(fout, 0);
 	encodeTree(tree, fout);
 	fseek(fin, 3, SEEK_SET);
 	do {
-		isRead = (int) fread(&ch, 1, 1, fin);
+		isRead = (int)fread(&ch, 1, 1, fin);
 		if (isRead)
 		{
 			i = 0;
@@ -53,7 +54,7 @@ void makeCodeTable(Tree * tree, char * code, char ** table)
 	if (tree->left)	{
 		makeCodeTable(tree->left, strcat(code, "0"), table);
 		code[strlen(code) - 1] = 0;
-		makeCodeTable(tree->right, strcat(code, "1"),table);
+		makeCodeTable(tree->right, strcat(code, "1"), table);
 		code[strlen(code) - 1] = 0;
 	}
 	else
@@ -71,7 +72,7 @@ unsigned char countBits(int * f, char ** c)
 	for (; i < 256; i++) {
 		if (!f[i])
 			continue;
-		res = (res + (f[i] * strlen(c[i])) % 8 ) % 8;
+		res = (res + (f[i] * strlen(c[i])) % 8) % 8;
 	}
 	return res;
 }
@@ -125,15 +126,15 @@ int * analyzeText(FILE * fin)
 	while (1)
 	{
 		table[tmp] += 1;
-		read =(char)fread(&tmp, sizeof(char), 1, fin);
+		read = (char)fread(&tmp, sizeof(char), 1, fin);
 		if (!read)
 			break;
-		
-	} 
+
+	}
 	return table;
 }
 
-int bitWriter(FILE * fout, unsigned char bit) 
+int bitWriter(FILE * fout, unsigned char bit)
 {
 	static unsigned char currentBit = 0;
 	static unsigned char byte = 0;
@@ -170,7 +171,7 @@ void writeByte(FILE * fout, unsigned char byte)
 {
 	unsigned char i = 0;
 	for (; i < 8; i++) {
-		bitWriter(fout, (byte & (1 << (BITS - i))) !=0 );
+		bitWriter(fout, (byte & (1 << (BITS - i))) != 0);
 	}
 }
 
