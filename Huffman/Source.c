@@ -16,14 +16,15 @@ int main()
 	}
 	
 	char type;
-	fscanf(fin, "%c\n", &type);
+	type = getc(fin);
+	getc(fin);
+	getc(fin);
 	if (type)
 		switch (type) {
 		case 'd':
 			decompress(fin, fout);
 			break;
 		case 'c':
-			//copyFile(fin, fcopy);
 			fseek(fin, 3, SEEK_SET);
 			compress(fin, fout);
 			break;
@@ -32,14 +33,4 @@ int main()
 			break;
 	}
 	return 0;
-}
-
-void copyFile(FILE * in, FILE * out)
-{
-	char a, c = 0;
-	c = fread(&c, 1, 1, in);
-	while (c){
-		fwrite(&a, 1, 1, out);
-		c = fread(&a, 1, 1, in);
-	}
 }
